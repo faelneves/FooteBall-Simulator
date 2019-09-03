@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
-
+//feito por arthur
 float tamanhoDaJanela = 500.0;
 float tamanhoDaBolaPixels = 20.0;
 float alturaDaBarraPixels = 150.0;
