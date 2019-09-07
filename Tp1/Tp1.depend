@@ -1,10 +1,12 @@
 # depslib dependency file v1.0
-1567834293 source:c:\users\spider\desktop\cg\atividade 1\tp1-master\tp1\main.cpp
+1567837291 source:c:\users\spider\desktop\cg\atividade 1\tp1-master\tp1\main.cpp
 	<SOIL/SOIL.h>
 	<GL/glew.h>
 	<GL/freeglut.h>
 	<stdio.h>
 	<stdlib.h>
+	<windows.h>
+	<MMSystem.h>
 
 1501501581 c:\program files (x86)\codeblocks\mingw\include\gl\glew.h
 	<stddef.h>

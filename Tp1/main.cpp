@@ -3,6 +3,8 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
+#include <MMSystem.h>
 
 
 float larguraDaJanela = 1000.0;
@@ -13,7 +15,7 @@ float larguraDaBarraPixels = 25.0;
 float tamanhoDaArestaBola, metadeTamanhoDaArestaBola;
 float alturaDaBarra, larguraDaBarra, metadeTamanhoDaAlturaBarra, metadeTamanhoDaLarguraBarra;
 float velocidadeBarra = 0.05;
-float veloBolaMulti = 0.2;
+float veloBolaMulti = 0.5;
 int pausado = 1;
 int pontosDireito = 0, pontosEsquerdo = 0;
 int idTexturaCampo;
@@ -75,7 +77,34 @@ int carregaTextura(const char* arquivo) {
 
     return idTextura;
 }
-
+void gritoGol(int gol) {
+    switch (gol) {
+        case 1:
+            PlaySound("gol1.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 2:
+            PlaySound("gol2.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 3:
+            PlaySound("gol3.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 4:
+            PlaySound("gol4.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 5:
+            PlaySound("gol5.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 6:
+            PlaySound("gol6.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        case 7:
+            PlaySound("gol7.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+        default:
+            PlaySound("gol.wav", NULL, SND_FILENAME | SND_ASYNC);
+        break;
+    }
+}
 void caracteristicasBarra()
 {
     larguraDaBarra = larguraDaBarraPixels / larguraDaJanela;
@@ -164,6 +193,7 @@ void respawnarBola()
         direcaoDaBola.x = 1.0;
         direcaoDaBola.y = -1.0;
         pontosEsquerdo++;
+        gritoGol(pontosEsquerdo);
     }
 
     if (posicaoDaBola.x <= -1)
@@ -173,6 +203,7 @@ void respawnarBola()
         direcaoDaBola.x = -1.0;
         direcaoDaBola.y = -1.0;
         pontosDireito++;
+        gritoGol(pontosDireito);
     }
 }
 
