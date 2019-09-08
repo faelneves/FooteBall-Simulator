@@ -3,9 +3,10 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
-#include <MMSystem.h>
-
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+//#include <windows.h>
+//#include <MMSystem.h>
 
 float larguraDaJanela = 1000.0;
 float AlturaDaJanela = 500.0;
@@ -16,16 +17,18 @@ float tamanhoDaArestaBola, metadeTamanhoDaArestaBola;
 float alturaDaBarra, larguraDaBarra, metadeTamanhoDaAlturaBarra, metadeTamanhoDaLarguraBarra;
 float velocidadeBarra = 0.05;
 float veloBolaMulti = 0.5;
-int pausado = 1;
+int pausado = 1, iniciarJogo = 1;
 int pontosDireito = 0, pontosEsquerdo = 0;
-int idTexturaCampo;
+int idTexturaCampo, idTexturaMenu;
+Mix_Music *musica = Mix_LoadMUS("sons/flamengo.mp3");
 
 struct vetor2d
 {
     float x, y;
 };
 
-struct sprite_animada {
+struct sprite_animada
+{
     vetor2d posicao;
     vetor2d dimensoes;
     int textura;
@@ -40,44 +43,66 @@ struct vetor2d barraDireitaCantoSuperiorEsquerdo, barraDireitaCantoInferiorEsque
 struct vetor2d barraEsquerdaCantoSuperiorEsquerdo, barraEsquerdaCantoInferiorEsquerdo, barraEsquerdaCantoSuperiorDireito, barraEsquerdaCantoInferiorDireito;
 struct vetor2d bolaCantoSuperiorEsquerdo, bolaCantoInferiorEsquerdo, bolaCantoSuperiorDireito, bolaCantoInferiorDireito;
 
+void criarMenu()
+{
+    Mix_PlayMusic(musica, -1);
 
-void desenhaSprite(struct sprite_animada sprite){
-    // Começa a usar a textura que criamos
-    glBindTexture(GL_TEXTURE_2D, sprite.textura);
- //printf("textura sprite: '%i'\n", sprite.textura);
+    glBindTexture(GL_TEXTURE_2D, idTexturaMenu);
     glBegin(GL_TRIANGLE_FAN);
-        // Associamos um canto da textura para cada vértice
 
-        glTexCoord2f(0, 0);
-        glVertex3f(-sprite.dimensoes.x, -sprite.dimensoes.y, 0);
+    glTexCoord2f(0, 0);
+    glVertex3f(-1, -1, 0);
 
-        glTexCoord2f(1, 0);
-        glVertex3f( sprite.dimensoes.x, -sprite.dimensoes.y, 0);
+    glTexCoord2f(1, 0);
+    glVertex3f(1, -1, 0);
 
-        glTexCoord2f(1, 1);
-        glVertex3f( sprite.dimensoes.x,  sprite.dimensoes.y, 0);
+    glTexCoord2f(1, 1);
+    glVertex3f(1, 1, 0);
 
-        glTexCoord2f(0, 1);
-        glVertex3f(-sprite.dimensoes.x,  sprite.dimensoes.y, 0);
+    glTexCoord2f(0, 1);
+    glVertex3f(-1, 1, 0);
+    glEnd();
+}
+
+void desenhaSprite(struct sprite_animada sprite)
+{
+    // Comeï¿½a a usar a textura que criamos
+    glBindTexture(GL_TEXTURE_2D, sprite.textura);
+    //printf("textura sprite: '%i'\n", sprite.textura);
+    glBegin(GL_TRIANGLE_FAN);
+    // Associamos um canto da textura para cada vï¿½rtice
+
+    glTexCoord2f(0, 0);
+    glVertex3f(-sprite.dimensoes.x, -sprite.dimensoes.y, 0);
+
+    glTexCoord2f(1, 0);
+    glVertex3f(sprite.dimensoes.x, -sprite.dimensoes.y, 0);
+
+    glTexCoord2f(1, 1);
+    glVertex3f(sprite.dimensoes.x, sprite.dimensoes.y, 0);
+
+    glTexCoord2f(0, 1);
+    glVertex3f(-sprite.dimensoes.x, sprite.dimensoes.y, 0);
     glEnd();
     //glDisable(GL_TEXTURE_2D);
 }
 
-int carregaTextura(const char* arquivo) {
+int carregaTextura(const char *arquivo)
+{
     GLuint idTextura = SOIL_load_OGL_texture(
-                           arquivo,
-                           SOIL_LOAD_AUTO,
-                           SOIL_CREATE_NEW_ID,
-                           SOIL_FLAG_INVERT_Y
-                       );
+        arquivo,
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y);
 
-    if (idTextura == 0) {
+    if (idTextura == 0)
+    {
         printf("Erro do SOIL: '%s'\n", SOIL_last_result());
     }
 
     return idTextura;
 }
-void gritoGol(int gol) {
+/*void gritoGol(int gol) {
     switch (gol) {
         case 1:
             PlaySound("gol1.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -104,7 +129,7 @@ void gritoGol(int gol) {
             PlaySound("gol.wav", NULL, SND_FILENAME | SND_ASYNC);
         break;
     }
-}
+}*/
 void caracteristicasBarra()
 {
     larguraDaBarra = larguraDaBarraPixels / larguraDaJanela;
@@ -193,7 +218,7 @@ void respawnarBola()
         direcaoDaBola.x = 1.0;
         direcaoDaBola.y = -1.0;
         pontosEsquerdo++;
-        gritoGol(pontosEsquerdo);
+        //gritoGol(pontosEsquerdo);
     }
 
     if (posicaoDaBola.x <= -1)
@@ -203,7 +228,7 @@ void respawnarBola()
         direcaoDaBola.x = -1.0;
         direcaoDaBola.y = -1.0;
         pontosDireito++;
-        gritoGol(pontosDireito);
+        //gritoGol(pontosDireito);
     }
 }
 
@@ -260,11 +285,10 @@ void desenhaBarras()
 
 void resetarScore()
 {
-    if(pontosEsquerdo == 12)
-    pontosEsquerdo = 0;
-    if(pontosDireito == 12)
-    pontosDireito = 0;
-
+    if (pontosEsquerdo == 12)
+        pontosEsquerdo = 0;
+    if (pontosDireito == 12)
+        pontosDireito = 0;
 }
 
 void desenhaScore(int pontosDireito, int pontosEsquerdo)
@@ -331,39 +355,47 @@ void desenhaScore(int pontosDireito, int pontosEsquerdo)
     }
 }
 
-void desenhaCampo() {
-    // Começa a usar a textura que criamos
+void desenhaCampo()
+{
+    // Comeï¿½a a usar a textura que criamos
     glBindTexture(GL_TEXTURE_2D, idTexturaCampo);
     glBegin(GL_TRIANGLE_FAN);
-        // Associamos um canto da textura para cada vértice
-        glTexCoord2f(0, 0);
-        glVertex3f(-1, -1,  0);
+    // Associamos um canto da textura para cada vï¿½rtice
+    glTexCoord2f(0, 0);
+    glVertex3f(-1, -1, 0);
 
-        glTexCoord2f(1, 0);
-        glVertex3f( 1, -1,  0);
+    glTexCoord2f(1, 0);
+    glVertex3f(1, -1, 0);
 
-        glTexCoord2f(1, 1);
-        glVertex3f( 1,  1,  0);
+    glTexCoord2f(1, 1);
+    glVertex3f(1, 1, 0);
 
-        glTexCoord2f(0, 1);
-        glVertex3f(-1,  1,  0);
+    glTexCoord2f(0, 1);
+    glVertex3f(-1, 1, 0);
     glEnd();
 }
 
 void desenhaMinhaCena()
 {
-    if (pausado)
-        movimentacaoDaBola();
 
     glClear(GL_COLOR_BUFFER_BIT);
     // Habilita o uso de texturas
     glEnable(GL_TEXTURE_2D);
 
-    desenhaCampo();
-    desenhaBola();
-    desenhaBarras();
-    desenhaScore(pontosDireito, pontosEsquerdo);
+    if (iniciarJogo == 1)
+    {
+        criarMenu();
+    }
+    else
+    {
+        if (pausado || iniciarJogo)
+            movimentacaoDaBola();
 
+        desenhaCampo();
+        desenhaBola();
+        desenhaBarras();
+        desenhaScore(pontosDireito, pontosEsquerdo);
+    }
     glutSwapBuffers();
 }
 
@@ -371,10 +403,11 @@ void setup()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
 
-    glEnable(GL_BLEND );
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     idTexturaCampo = carregaTextura("campo.png");
+    idTexturaMenu = carregaTextura("menu.png");
     //bola.textura = carregaTextura("bola_inanimada.png");
     bola.textura = carregaTextura("bola.png");
     bola.dimensoes.x = metadeTamanhoDaArestaBola;
@@ -460,6 +493,9 @@ void teclaPressionada(unsigned char key, int x, int y)
         }
         else
             break;
+    case 13:
+        iniciarJogo *= -1;
+        break;
 
     default:
         break;
