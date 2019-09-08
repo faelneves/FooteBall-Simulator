@@ -3,16 +3,16 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-//#include <windows.h>
-//#include <MMSystem.h>
+//#include <SDL2/SDL.h>
+//#include <SDL2/SDL_mixer.h>
+#include <windows.h>
+#include <MMSystem.h>
 
 float larguraDaJanela = 1000.0;
 float AlturaDaJanela = 500.0;
-float tamanhoDaBolaPixels = 200.0;
+float tamanhoDaBolaPixels = 90.0;
 float alturaDaBarraPixels = 150.0;
-float larguraDaBarraPixels = 25.0;
+float larguraDaBarraPixels = 50.0;
 float tamanhoDaArestaBola, metadeTamanhoDaArestaBola;
 float alturaDaBarra, larguraDaBarra, metadeTamanhoDaAlturaBarra, metadeTamanhoDaLarguraBarra;
 float velocidadeBarra = 0.05;
@@ -20,7 +20,8 @@ float veloBolaMulti = 0.5;
 int pausado = 1, iniciarJogo = 1;
 int pontosDireito = 0, pontosEsquerdo = 0;
 int idTexturaCampo, idTexturaMenu;
-Mix_Music *musica = Mix_LoadMUS("sons/flamengo.mp3");
+int periodoQuadro = 100;
+//Mix_Music *musica = Mix_LoadMUS("sons/flamengo.mp3");
 
 struct vetor2d
 {
@@ -30,13 +31,13 @@ struct vetor2d
 struct sprite_animada
 {
     vetor2d posicao;
+    vetor2d tamanho;
     vetor2d dimensoes;
     int textura;
-    int quadroAtual;
-    vetor2d sequenciaQuadros[];
 };
 
-struct sprite_animada bola;
+struct sprite_animada bola, persoDireito, persoEsquerdo;
+
 struct vetor2d posicaoDaBola, direcaoDaBola;
 struct vetor2d posicaoDaBarraEsquerda, posicaoDaBarraDireita;
 struct vetor2d barraDireitaCantoSuperiorEsquerdo, barraDireitaCantoInferiorEsquerdo, barraDireitaCantoSuperiorDireito, barraDireitaCantoInferiorDireito;
@@ -45,7 +46,7 @@ struct vetor2d bolaCantoSuperiorEsquerdo, bolaCantoInferiorEsquerdo, bolaCantoSu
 
 void criarMenu()
 {
-    Mix_PlayMusic(musica, -1);
+    //Mix_PlayMusic(musica, -1);
 
     glBindTexture(GL_TEXTURE_2D, idTexturaMenu);
     glBegin(GL_TRIANGLE_FAN);
@@ -68,23 +69,23 @@ void desenhaSprite(struct sprite_animada sprite)
 {
     // Come�a a usar a textura que criamos
     glBindTexture(GL_TEXTURE_2D, sprite.textura);
-    //printf("textura sprite: '%i'\n", sprite.textura);
+    //printf("textura sprite: '%f'\n", sprite.posicao.x);
+    glBegin(GL_TRIANGLES);
     glBegin(GL_TRIANGLE_FAN);
-    // Associamos um canto da textura para cada v�rtice
 
-    glTexCoord2f(0, 0);
+    glTexCoord2f(sprite.posicao.x, sprite.posicao.y);
     glVertex3f(-sprite.dimensoes.x, -sprite.dimensoes.y, 0);
 
-    glTexCoord2f(1, 0);
+    glTexCoord2f(sprite.posicao.x+sprite.tamanho.x, sprite.posicao.y);
     glVertex3f(sprite.dimensoes.x, -sprite.dimensoes.y, 0);
 
-    glTexCoord2f(1, 1);
+    glTexCoord2f(sprite.posicao.x+sprite.tamanho.x, sprite.posicao.y+sprite.tamanho.y);
     glVertex3f(sprite.dimensoes.x, sprite.dimensoes.y, 0);
 
-    glTexCoord2f(0, 1);
+    glTexCoord2f(sprite.posicao.x, sprite.posicao.y+sprite.tamanho.y);
     glVertex3f(-sprite.dimensoes.x, sprite.dimensoes.y, 0);
+
     glEnd();
-    //glDisable(GL_TEXTURE_2D);
 }
 
 int carregaTextura(const char *arquivo)
@@ -102,7 +103,7 @@ int carregaTextura(const char *arquivo)
 
     return idTextura;
 }
-/*void gritoGol(int gol) {
+void gritoGol(int gol) {
     switch (gol) {
         case 1:
             PlaySound("gol1.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -129,17 +130,35 @@ int carregaTextura(const char *arquivo)
             PlaySound("gol.wav", NULL, SND_FILENAME | SND_ASYNC);
         break;
     }
-}*/
+}
 void caracteristicasBarra()
 {
     larguraDaBarra = larguraDaBarraPixels / larguraDaJanela;
     metadeTamanhoDaLarguraBarra = larguraDaBarra / 2;
     alturaDaBarra = alturaDaBarraPixels / AlturaDaJanela;
     metadeTamanhoDaAlturaBarra = alturaDaBarra / 2;
+    //Barra Direita
     posicaoDaBarraDireita.x = 0.9;
     posicaoDaBarraDireita.y = 0.0;
+    persoDireito.textura = carregaTextura("persoDireito.png");
+    persoDireito.dimensoes.x = metadeTamanhoDaLarguraBarra;
+    persoDireito.dimensoes.y = metadeTamanhoDaAlturaBarra;
+    persoDireito.tamanho.x =0.25;
+    persoDireito.tamanho.y =1;
+    persoDireito.posicao.x = 0;
+    persoDireito.posicao.y = 0;
+
+    //Barra Esquerda
     posicaoDaBarraEsquerda.x = -0.9;
     posicaoDaBarraEsquerda.y = 0.0;
+    persoEsquerdo.textura = carregaTextura("persoEsquerdo.png");
+    persoEsquerdo.dimensoes.x = metadeTamanhoDaLarguraBarra;
+    persoEsquerdo.dimensoes.y = metadeTamanhoDaAlturaBarra;
+    persoEsquerdo.tamanho.x =0.25;
+    persoEsquerdo.tamanho.y =1;
+    persoEsquerdo.posicao.x = 0;
+    persoEsquerdo.posicao.y = 0;
+
 }
 
 void caracteristicasBola()
@@ -151,6 +170,13 @@ void caracteristicasBola()
     posicaoDaBola.y = 1.0;
     direcaoDaBola.x = 1.0;
     direcaoDaBola.y = -1.0;
+    bola.textura = carregaTextura("bola.png");
+    bola.dimensoes.x = metadeTamanhoDaArestaBola;
+    bola.dimensoes.y = metadeTamanhoDaArestaBola;
+    bola.tamanho.x =0.166;
+    bola.tamanho.y =1;
+    bola.posicao.x = 0.16;
+    bola.posicao.y = 0;
 }
 
 void verificarColisaoComTela()
@@ -218,7 +244,7 @@ void respawnarBola()
         direcaoDaBola.x = 1.0;
         direcaoDaBola.y = -1.0;
         pontosEsquerdo++;
-        //gritoGol(pontosEsquerdo);
+        gritoGol(pontosEsquerdo);
     }
 
     if (posicaoDaBola.x <= -1)
@@ -228,7 +254,7 @@ void respawnarBola()
         direcaoDaBola.x = -1.0;
         direcaoDaBola.y = -1.0;
         pontosDireito++;
-        //gritoGol(pontosDireito);
+        gritoGol(pontosDireito);
     }
 }
 
@@ -259,27 +285,14 @@ void desenhaBola()
 
 void desenhaBarras()
 {
-    glDisable(GL_TEXTURE_2D);
     glPushMatrix();
     glTranslatef(posicaoDaBarraEsquerda.x, posicaoDaBarraEsquerda.y, 0.0);
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor3f(1.0, 1.0, 1.0);
-    glVertex2f(-metadeTamanhoDaLarguraBarra, -metadeTamanhoDaAlturaBarra);
-    glVertex2f(metadeTamanhoDaLarguraBarra, -metadeTamanhoDaAlturaBarra);
-    glVertex2f(-metadeTamanhoDaLarguraBarra, metadeTamanhoDaAlturaBarra);
-    glVertex2f(metadeTamanhoDaLarguraBarra, metadeTamanhoDaAlturaBarra);
-    glEnd();
+    desenhaSprite(persoEsquerdo);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(posicaoDaBarraDireita.x, posicaoDaBarraDireita.y, 0.0);
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor3f(1.0, 1.0, 1.0);
-    glVertex2f(-metadeTamanhoDaLarguraBarra, -metadeTamanhoDaAlturaBarra);
-    glVertex2f(metadeTamanhoDaLarguraBarra, -metadeTamanhoDaAlturaBarra);
-    glVertex2f(-metadeTamanhoDaLarguraBarra, metadeTamanhoDaAlturaBarra);
-    glVertex2f(metadeTamanhoDaLarguraBarra, metadeTamanhoDaAlturaBarra);
-    glEnd();
+    desenhaSprite(persoDireito);
     glPopMatrix();
 }
 
@@ -293,6 +306,7 @@ void resetarScore()
 
 void desenhaScore(int pontosDireito, int pontosEsquerdo)
 {
+    glDisable(GL_TEXTURE_2D);
     resetarScore();
     int pontosDireitoEmASCII = 38 + pontosDireito, pontosEsquerdoEmASCII = 38 + pontosEsquerdo;
     if (pontosEsquerdo <= 9)
@@ -399,20 +413,34 @@ void desenhaMinhaCena()
     glutSwapBuffers();
 }
 
+void proximoQuadro(int periodo) {
+    if((bola.posicao.x + 2*bola.tamanho.x) >= 1){
+        bola.posicao.x = 0;
+    } else {
+        bola.posicao.x += bola.tamanho.x;
+    }
+
+    if((persoDireito.posicao.x + 2*persoDireito.tamanho.x) >= 1){
+        persoEsquerdo.posicao.x = 0;
+        persoDireito.posicao.x = 0;
+    } else {
+        persoDireito.posicao.x += persoDireito.tamanho.x;
+        persoEsquerdo.posicao.x += persoEsquerdo.tamanho.x;
+    }
+    glutTimerFunc(periodo, proximoQuadro, periodo);
+
+
+}
+
 void setup()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     idTexturaCampo = carregaTextura("campo.png");
     idTexturaMenu = carregaTextura("menu.png");
-    //bola.textura = carregaTextura("bola_inanimada.png");
-    bola.textura = carregaTextura("bola.png");
-    bola.dimensoes.x = metadeTamanhoDaArestaBola;
-    bola.dimensoes.y = metadeTamanhoDaArestaBola;
-    bola.quadroAtual = 0;
+
     //bola.sequenciaQuadros[1] = struct vetor2d.x;
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
@@ -509,24 +537,28 @@ void desenharNovamente()
 
 int main(int argc, char **argv)
 {
-    caracteristicasBola();
-    caracteristicasBarra();
 
     glutInit(&argc, argv);
 
     glutInitContextVersion(1, 1);
     glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(larguraDaJanela, AlturaDaJanela);
     glutInitWindowPosition(200, 150);
 
+
     glutCreateWindow("PONG");
+
+    caracteristicasBola();
+    caracteristicasBarra();
 
     glutDisplayFunc(desenhaMinhaCena);
     glutReshapeFunc(redimensionada);
     glutKeyboardFunc(teclaPressionada);
 
+
+    glutTimerFunc(0, proximoQuadro, periodoQuadro);
     glutIdleFunc(desenharNovamente);
 
     setup();
