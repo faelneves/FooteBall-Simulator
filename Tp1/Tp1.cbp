@@ -19,6 +19,9 @@
 					<Add library="../../../../../../../Program Files (x86)/CodeBlocks/MinGW/lib/libSOIL.a" />
 					<Add library="../../../../../../../Program Files (x86)/CodeBlocks/MinGW/lib/libglu32.a" />
 					<Add library="../../../../../../../Program Files (x86)/CodeBlocks/MinGW/lib/libopengl32.a" />
+					<Add library="SDL2main" />
+					<Add library="SDL2" />
+					<Add library="SDL2_mixer" />
 				</Linker>
 			</Target>
 			<Target title="Release">
