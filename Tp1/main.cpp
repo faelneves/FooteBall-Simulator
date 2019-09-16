@@ -22,7 +22,7 @@ float veloBolaMulti = 1.8;
 int pausado = 1, iniciarJogo = 1;
 int pontosDireito = 0, pontosEsquerdo = 0;
 int setDireito = 0, setEsquerdo = 0;
-int idTexturaCampo, idTexturaMenu, idDireito_Inv, idEsquerdo_Inv, idDireito, idEsquerdo;
+int idTexturaCampo, idTexturaMenu, idTexturaPause, idDireito_Inv, idEsquerdo_Inv, idDireito, idEsquerdo;
 int periodoQuadro = 100;
 char direitoCima = '1';
 char direitoBaixo = '0';
@@ -105,6 +105,25 @@ void criarMenu()
     glEnd();
 }
 
+void pause()
+{
+    glBindTexture(GL_TEXTURE_2D, idTexturaPause);
+    glBegin(GL_TRIANGLE_FAN);
+
+    glTexCoord2f(0, 0);
+    glVertex3f(-1, -1, 0);
+
+    glTexCoord2f(1, 0);
+    glVertex3f(1, -1, 0);
+
+    glTexCoord2f(1, 1);
+    glVertex3f(1, 1, 0);
+
+    glTexCoord2f(0, 1);
+    glVertex3f(-1, 1, 0);
+    glEnd();
+}
+
 void desenhaSprite(struct sprite_animada sprite)
 {
     glBindTexture(GL_TEXTURE_2D, sprite.textura);
@@ -143,7 +162,8 @@ int carregaTextura(const char *arquivo)
     return idTextura;
 }
 
-void inverteLado() {
+void inverteLado()
+{
     char aux;
     aux = direitoCima;
     direitoCima = esquerdoCima;
@@ -153,10 +173,13 @@ void inverteLado() {
     direitoBaixo = esquerdoBaixo;
     esquerdoBaixo = aux;
 
-    if(persoDireito.textura == idDireito){
+    if (persoDireito.textura == idDireito)
+    {
         persoDireito.textura = idEsquerdo_Inv;
         persoEsquerdo.textura = idDireito_Inv;
-    } else {
+    }
+    else
+    {
         persoDireito.textura = idDireito;
         persoEsquerdo.textura = idEsquerdo;
     }
@@ -393,24 +416,26 @@ void desenhaBarras()
 
 void resetarScore()
 {
-    if (pontosEsquerdo > 10 && (pontosEsquerdo>pontosDireito+1)){
+    if (pontosEsquerdo > 10 && (pontosEsquerdo > pontosDireito + 1))
+    {
         inverteLado();
         pontosEsquerdo = 0;
         pontosDireito = 0;
-        if(setEsquerdo==0)
+        if (setEsquerdo == 0)
             setEsquerdo++;
         else
-            setEsquerdo+=2;
+            setEsquerdo += 2;
     }
 
-    if (pontosDireito > 10 && (pontosDireito>pontosEsquerdo+1)) {
+    if (pontosDireito > 10 && (pontosDireito > pontosEsquerdo + 1))
+    {
         inverteLado();
         pontosEsquerdo = 0;
         pontosDireito = 0;
-        if(setDireito==0)
+        if (setDireito == 0)
             setDireito++;
         else
-            setDireito+=2;
+            setDireito += 2;
     }
 }
 
@@ -422,41 +447,40 @@ void desenhaScore(int pontosDireito, int pontosEsquerdo)
     {
         glPushMatrix();
         glTranslatef(-0.15, 0.9, 0);
-        placar.posicao.x = (float)(pontosEsquerdo/10)/10;
+        placar.posicao.x = (float)(pontosEsquerdo / 10) / 10;
         desenhaSprite(placar);
         glPopMatrix();
     }
     glPushMatrix();
     glTranslatef(-0.1, 0.9, 0);
-    placar.posicao.x = (float)(pontosEsquerdo%10)/10;
+    placar.posicao.x = (float)(pontosEsquerdo % 10) / 10;
     desenhaSprite(placar);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(-0.9, 0.9, 0);
-    placar_set.posicao.x = (float)(setEsquerdo%10)/10;
+    placar_set.posicao.x = (float)(setEsquerdo % 10) / 10;
     desenhaSprite(placar_set);
     glPopMatrix();
 
-
     //escreve pontos direito
-     if (pontosDireito > 9)
+    if (pontosDireito > 9)
     {
         glPushMatrix();
         glTranslatef(0.05, 0.9, 0);
-        placar.posicao.x = (float)(pontosDireito/10)/10;
+        placar.posicao.x = (float)(pontosDireito / 10) / 10;
         desenhaSprite(placar);
         glPopMatrix();
     }
     glPushMatrix();
     glTranslatef(0.1, 0.9, 0);
-    placar.posicao.x = (float)(pontosDireito%10)/10;
+    placar.posicao.x = (float)(pontosDireito % 10) / 10;
     desenhaSprite(placar);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0.9, 0.9, 0);
-    placar_set.posicao.x = (float)(setDireito%10)/10;
+    placar_set.posicao.x = (float)(setDireito % 10) / 10;
     desenhaSprite(placar_set);
     glPopMatrix();
 }
@@ -491,18 +515,20 @@ void desenhaMinhaCena()
     if (iniciarJogo == 1)
     {
         criarMenu();
-//        Mix_ResumeMusic();
+        //        Mix_ResumeMusic();
     }
     else
     {
-        if (pausado || iniciarJogo)
+        if (pausado)
             movimentacaoDaBola();
- //       Mix_PauseMusic();
+        //       Mix_PauseMusic();
         desenhaCampo();
         desenhaBola();
         desenhaBarras();
         desenhaScore(pontosDireito, pontosEsquerdo);
+    
     }
+    if(pausado == 0) pause();
     glutSwapBuffers();
 }
 
@@ -517,7 +543,7 @@ void proximoQuadro(int periodo)
         bola.posicao.x += bola.tamanho.x;
     }
 
-    if ((persoDireito.posicao.x +  persoDireito.tamanho.x) >= 1)
+    if ((persoDireito.posicao.x + persoDireito.tamanho.x) >= 1)
     {
         persoEsquerdo.posicao.x = 0;
         persoDireito.posicao.x = 0;
@@ -538,6 +564,7 @@ void setup()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     idTexturaCampo = carregaTextura("campo.png");
     idTexturaMenu = carregaTextura("menu.png");
+    idTexturaPause = carregaTextura("pause.png");
 
     placar.textura = carregaTextura("placar.png");
     placar.dimensoes.x = larguraPlacar;
@@ -573,9 +600,12 @@ void redimensionada(int width, int height)
 
 void teclaPressionada(unsigned char key, int x, int y)
 {
-    if(key == 27){
+    if (key == 27)
+    {
         exit(0);
-    } else if(key == 'r'){
+    }
+    else if (key == 'r')
+    {
         posicaoDaBola.x = 0.0;
         posicaoDaBola.y = 1.0;
         direcaoDaBola.x = 1.0;
@@ -586,37 +616,54 @@ void teclaPressionada(unsigned char key, int x, int y)
         posicaoDaBarraEsquerda.y = 0.0;
         pontosEsquerdo = 0;
         pontosDireito = 0;
-    } else if(key=='f'){
+    }
+    else if (key == 'f')
+    {
         //Mix_RewindMusic();
-    } else if(key=='p'){
+    }
+    else if (key == 'p')
+    {
         if (pausado)
+        {
             pausado = 0;
-        else
+        }
+        else{
             pausado = 1;
-    } else if(key==esquerdoCima){
+        }
+    }
+    else if (key == esquerdoCima)
+    {
         if (posicaoDaBarraEsquerda.y <= 1 - metadeTamanhoDaAlturaBarra && pausado)
         {
             posicaoDaBarraEsquerda.y += velocidadeBarra;
         }
-    } else if(key==esquerdoBaixo){
+    }
+    else if (key == esquerdoBaixo)
+    {
         if (posicaoDaBarraEsquerda.y >= -1 + metadeTamanhoDaAlturaBarra && pausado)
         {
             posicaoDaBarraEsquerda.y -= velocidadeBarra;
         }
-    } else if(key==direitoCima){
+    }
+    else if (key == direitoCima)
+    {
         if (posicaoDaBarraDireita.y <= 1 - metadeTamanhoDaAlturaBarra && pausado)
         {
             posicaoDaBarraDireita.y += velocidadeBarra;
         }
-    } else if(key==direitoBaixo){
+    }
+    else if (key == direitoBaixo)
+    {
         if (posicaoDaBarraDireita.y >= -1 + metadeTamanhoDaAlturaBarra && pausado)
         {
             posicaoDaBarraDireita.y -= velocidadeBarra;
         }
-    } else if(key==13){
+    }
+    else if (key == 13)
+    {
         iniciarJogo *= -1;
     }
- /*
+    /*
     switch (key)
     {
     case 27:
