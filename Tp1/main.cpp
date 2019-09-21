@@ -3,8 +3,8 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 //#include <windows.h>
 //#include <MMSystem.h>
 
@@ -28,7 +28,7 @@ char direitoCima = '1';
 char direitoBaixo = '0';
 char esquerdoCima = 'w';
 char esquerdoBaixo = 's';
-/*Mix_Music *musica = NULL;
+Mix_Music *musica = NULL;
 Mix_Chunk *gol = NULL;
 Mix_Chunk *gol1 = NULL;
 Mix_Chunk *gol2 = NULL;
@@ -36,7 +36,7 @@ Mix_Chunk *gol3 = NULL;
 Mix_Chunk *gol4 = NULL;
 Mix_Chunk *gol5 = NULL;
 Mix_Chunk *gol6 = NULL;
-Mix_Chunk *gol7 = NULL;*/
+Mix_Chunk *gol7 = NULL;
 
 struct vetor2d
 {
@@ -59,7 +59,7 @@ struct vetor2d barraDireitaCantoSuperiorEsquerdo, barraDireitaCantoInferiorEsque
 struct vetor2d barraEsquerdaCantoSuperiorEsquerdo, barraEsquerdaCantoInferiorEsquerdo, barraEsquerdaCantoSuperiorDireito, barraEsquerdaCantoInferiorDireito;
 struct vetor2d bolaCantoSuperiorEsquerdo, bolaCantoInferiorEsquerdo, bolaCantoSuperiorDireito, bolaCantoInferiorDireito;
 
-/*bool init()
+bool init()
 {
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
         return -1;
@@ -84,7 +84,7 @@ void inicializarSonsLinux()
     gol5 = Mix_LoadWAV("sons/gol5.wav");
     gol6 = Mix_LoadWAV("sons/gol6.wav");
     gol7 = Mix_LoadWAV("sons/gol7.wav");
-}*/
+}
 
 void criarMenu()
 {
@@ -128,7 +128,7 @@ void desenhaSprite(struct sprite_animada sprite)
 {
     glBindTexture(GL_TEXTURE_2D, sprite.textura);
 
-    glBegin(GL_TRIANGLES);
+    //glBegin(GL_TRIANGLES);
     glBegin(GL_TRIANGLE_FAN);
 
     glTexCoord2f(sprite.posicao.x, sprite.posicao.y);
@@ -215,7 +215,7 @@ void inverteLado()
 
 void gritoGolLinux(int gol)
 {
-    /*switch (gol)
+    switch (gol)
     {
     case 1:
         Mix_PlayChannel(-1, gol1, 0);
@@ -240,7 +240,7 @@ void gritoGolLinux(int gol)
     default:
         //Mix_PlayChannel(-1, gol, 1);
         break;
-    }*/
+    }
 }
 
 void caracteristicasBarra()
@@ -257,7 +257,7 @@ void caracteristicasBarra()
     //Barra Direita
     posicaoDaBarraDireita.x = 0.9;
     posicaoDaBarraDireita.y = 0.0;
-    //persoDireito.textura = carregaTextura("bin/Debug/persoDireito.png");
+    persoDireito.textura = carregaTextura("persoDireito.png");
     persoDireito.textura = idDireito;
     persoDireito.dimensoes.x = metadeTamanhoDaLarguraBarra;
     persoDireito.dimensoes.y = metadeTamanhoDaAlturaBarra;
@@ -362,7 +362,7 @@ void respawnarBola()
         direcaoDaBola.x = 1.0;
         direcaoDaBola.y = -1.0;
         pontosEsquerdo++;
-        //gritoGol(pontosEsquerdo);
+        gritoGolLinux(pontosEsquerdo);
     }
 
     if (posicaoDaBola.x <= -1)
@@ -372,7 +372,7 @@ void respawnarBola()
         direcaoDaBola.x = -1.0;
         direcaoDaBola.y = -1.0;
         pontosDireito++;
-        //gritoGol(pontosDireito);
+        gritoGolLinux(pontosDireito);
     }
 }
 
@@ -381,7 +381,7 @@ void movimentacaoDaBola()
     verificarColisaoComTela();
     verificarColisaoComBarras();
     respawnarBola();
-    float velocidadeDaBola = veloBolaMulti * (1 / (float)larguraDaJanela);
+    float velocidadeDaBola = veloBolaMulti * (5 / (float)larguraDaJanela);
     posicaoDaBola.x += velocidadeDaBola * direcaoDaBola.x;
     posicaoDaBola.y += velocidadeDaBola * direcaoDaBola.y;
 }
@@ -515,13 +515,13 @@ void desenhaMinhaCena()
     if (iniciarJogo == 1)
     {
         criarMenu();
-        //        Mix_ResumeMusic();
+        Mix_ResumeMusic();
     }
     else
     {
         if (pausado)
             movimentacaoDaBola();
-        //       Mix_PauseMusic();
+            Mix_PauseMusic();
         desenhaCampo();
         desenhaBola();
         desenhaBarras();
@@ -619,7 +619,7 @@ void teclaPressionada(unsigned char key, int x, int y)
     }
     else if (key == 'f')
     {
-        //Mix_RewindMusic();
+        Mix_RewindMusic();
     }
     else if (key == 'p')
     {
@@ -758,9 +758,9 @@ int main(int argc, char **argv)
 
     glutCreateWindow("PONG");
 
-    //init();
-    //inicializarSonsLinux();
-    //Mix_PlayMusic(musica, -1);
+    init();
+    inicializarSonsLinux();
+    Mix_PlayMusic(musica, -1);
     caracteristicasBola();
     caracteristicasBarra();
 
