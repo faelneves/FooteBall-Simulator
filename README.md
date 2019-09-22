@@ -1,7 +1,7 @@
 # FooteBall Simulator
 
 FootBall Simulator é um jogo desenvolvido para a matéria de computação gráfica que tem como base o antigo jogo de Video Game chamado Pong.
-O game se diferencia pela inserção do meio futebolistico com a narração do mundialmente conhecido Galvão Bueno, musícas de organizadas dos times brasileiros e pelo famoso classico entre brasileiros e alemães.
+O game se diferencia pela inserção do meio futebolistico com a narração do mundialmente conhecido Galvão Bueno, musicas de organizadas dos times brasileiros e pelo famoso clássico entre brasileiros e alemães.
 
 Para Jogar bastar instalar as bibliotecas utilizadas atraves dos comandos abaixo: 
 
@@ -15,7 +15,7 @@ sudo apt-get install libsdl-mixer1.2-dev;
 ```
 Após isso utilize o MakeFile para compilar e executar o programa por meio dos comandos `make` e `make run`.
 
-Para controlar os personagens utilize as teclas "w" e "s", "1" e "0". Caso Deseja pausar acione a tecla "p", para reiniciar a tecla "r" e para sair precione "esc";
+Para controlar os personagens utilize as teclas "w" e "s", "1" e "0". Caso Deseja pausar acione a tecla "p", para reiniciar a tecla "r" e para sair pressione "esc";
 
 GamePlay disponível em: 
 
